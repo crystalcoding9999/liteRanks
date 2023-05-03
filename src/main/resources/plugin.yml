@@ -1,0 +1,14 @@
+name: liteRanks
+version: '1.0'
+main: com.crystalcraft.literanks.Main
+api-version: 1.19
+
+permissions:
+  ranks:
+    default: op
+
+commands:
+  ranks:
+    description: main ranks command
+  ping:
+    description: debug command

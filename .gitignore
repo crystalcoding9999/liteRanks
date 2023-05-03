@@ -1,0 +1,6 @@
+.gitignore
+
+.idea
+target
+liteRanks.iml
+pom.xml
