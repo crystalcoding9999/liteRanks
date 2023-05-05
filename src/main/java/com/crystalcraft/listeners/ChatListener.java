@@ -16,6 +16,7 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
+        e.setCancelled(true);
         Player p = e.getPlayer();
         String pn = Core.color(Main.playerDNames.get(p.getUniqueId()) + "&r");
         String s = e.getMessage();

@@ -24,10 +24,9 @@ public class JoinListener implements Listener {
             Core.console("there was an error while loading " + p.getName() + "'s rank");
             return;
         }
-        String dName = r.getPrefix() + " " + p.getName();
-        p.setPlayerListName(Core.color(dName));
-        Main.playerDNames.put(p.getUniqueId(), dName);
-        Core.console(p.getName() + "'s display name has been set to " + Main.playerDNames.get(p.getUniqueId()));
+        Main.rankManager.updateName(p);
+        Main.permissionsManager.updatePlayerPermissions(p);
+        String dName = Main.playerDNames.get(p.getUniqueId());
         e.setJoinMessage(Core.color(dName + "&e joined the game"));
     }
 }

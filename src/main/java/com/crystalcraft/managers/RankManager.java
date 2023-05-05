@@ -6,6 +6,7 @@ import com.crystalcraft.literanks.Main;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -44,11 +45,12 @@ public class RankManager {
     }
 
     private void load() {
-        Core.console("loading saved data");
+        Core.console("[liteRanks] loading saved data");
         File configFile = new File(Main.instance.getDataFolder(), "config.yml");
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
         // ranks
+        Core.console("[liteRanks] loading ranks");
         Constructor constructor = new Constructor(Rank.class);
         Representer representer = new Representer();
         representer.addClassTag(Rank.class, Tag.MAP);
@@ -59,8 +61,17 @@ public class RankManager {
 
         ranks = yaml.loadAs(serializedList, List.class);
 
+        for (Rank r : ranks) {
+            if (r.getName().equalsIgnoreCase(config.getString("defaultRank")))
+                defaultRank = r;
+        }
+
         // playerRanks
-        ConfigurationSection playerRanksSection = config.createSection("playerRanks");
+        Core.console("[liteRanks] loading player ranks");
+        ConfigurationSection playerRanksSection = config.getConfigurationSection("playerRanks");
+
+        if (playerRanksSection == null)
+            playerRanksSection = config.createSection("playerRanks");
 
         Set<String> keys = playerRanksSection.getKeys(false);
         for (String key : keys) {
@@ -89,6 +100,8 @@ public class RankManager {
             playerRanksSection.set(key.toString(), playerRanks.get(key));
         }
 
+        config.set("defaultRank", defaultRank.getName());
+
         //saving the config file
         try {
             config.save(configFile);
@@ -107,11 +120,12 @@ public class RankManager {
         Core.console(" • created the default ranks");
     }
 
-    public @NotNull Rank createRank(String name, String prefix, List<String> permissions) {
+    public Rank createRank(String name, String prefix, List<String> permissions) {
         Rank r = new Rank();
         r.setName(name);
         r.setPrefix(prefix);
         r.setPermissions(permissions);
+        r.setParentRank("");
         return r;
     }
 
@@ -137,7 +151,11 @@ public class RankManager {
     }
 
     public void setRank(UUID uuid, Rank r) {
+        Player p = Core.uuidToPlayer(uuid);
         playerRanks.put(uuid,r.getName());
+        Main.permissionsManager.updatePlayerPermissions(p);
+        Core.message(Main.prefix + "your rank has been set to " + r.getName(), p);
+        updateName(p);
     }
 
     public Rank findRank(String rName) {
@@ -148,5 +166,46 @@ public class RankManager {
             }
         }
         return null;
+    }
+
+    public void deleteRank(Rank r) {
+        ranks.remove(r);
+        for (Rank rank : ranks) {
+            if (rank.getParentRank().equalsIgnoreCase(r.getName())) {
+                rank.setParentRank("");
+                for (UUID u : playerRanks.keySet()) {
+                    if (getRank(u).getName().equalsIgnoreCase(rank.getName())) {
+                        Core.message(Main.prefix + "&cWARNING, your ranks parent rank has been deleted!", Core.uuidToPlayer(u));
+                        Core.message(Main.prefix + "&cYour permissions might break", Core.uuidToPlayer(u));
+                    }
+                }
+            }
+        }
+        for (UUID u : playerRanks.keySet()) {
+            if (playerRanks.get(u).equalsIgnoreCase(r.getName())) {
+                Player p = Core.uuidToPlayer(u);
+                playerRanks.put(u,defaultRank.getName());
+                Core.message(Main.prefix + "your rank has been set to " + defaultRank.getName() + " because your previous rank was deleted", p);
+                updateName(p);
+            }
+        }
+    }
+
+    public void changePrefix(Rank r, String prefix) {
+        ranks.remove(r);
+        r.setPrefix(prefix);
+        ranks.add(r);
+        for (UUID u : playerRanks.keySet()) {
+            if (playerRanks.get(u).equalsIgnoreCase(r.getName())) {
+                updateName(Core.uuidToPlayer(u));
+            }
+        }
+    }
+
+    public void updateName(Player p) {
+        Rank r = getRank(p.getUniqueId());
+        String dName = r.getPrefix() + " " + p.getName();
+        Main.playerDNames.put(p.getUniqueId(), dName);
+        p.setPlayerListName(Core.color(dName));
     }
 }

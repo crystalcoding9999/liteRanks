@@ -6,9 +6,13 @@ api-version: 1.19
 permissions:
   ranks:
     default: op
+  test:
+    default: false
 
 commands:
   ranks:
     description: main ranks command
   ping:
     description: debug command
+  test:
+    permission: test

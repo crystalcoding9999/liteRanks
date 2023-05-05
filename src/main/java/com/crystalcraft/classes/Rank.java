@@ -8,6 +8,8 @@ public class Rank {
     private String prefix;
     private List<String> permissions;
 
+    private String parentRank;
+
     public Rank() {
         // no-args constructor required by SnakeYAML
     }
@@ -34,5 +36,17 @@ public class Rank {
 
     public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
+    }
+
+    public String getParentRank() {
+        return parentRank;
+    }
+
+    public void setParentRank(String parentRank) {
+        this.parentRank = parentRank;
+    }
+
+    public boolean hasParentRank() {
+        return !(getParentRank().equalsIgnoreCase( ""));
     }
 }
