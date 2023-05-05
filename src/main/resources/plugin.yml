@@ -6,13 +6,13 @@ api-version: 1.19
 permissions:
   ranks:
     default: op
-  #test:
+  #test: # debug permission used during development
   #  default: false
 
 commands:
   ranks:
     description: main ranks command
-  #ping:
+  #ping: # debug command used during development
   #  description: debug command
-  #test:
+  #test: # debug command used during development
   #  permission: test
