@@ -30,9 +30,6 @@ public class RankManager {
 
         load();
 
-        if (ranks == null)
-            ranks = new ArrayList<>();
-
         if (ranks.isEmpty())
             defaultRanks();
 
@@ -60,6 +57,9 @@ public class RankManager {
         if (serializedList == null) serializedList = "";
 
         ranks = yaml.loadAs(serializedList, List.class);
+
+        if (ranks == null)
+            ranks = new ArrayList<>();
 
         for (Rank r : ranks) {
             if (r.getName().equalsIgnoreCase(config.getString("defaultRank")))

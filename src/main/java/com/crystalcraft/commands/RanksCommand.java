@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class RanksCommand implements CommandExecutor {
     @Override
@@ -118,6 +119,28 @@ public class RanksCommand implements CommandExecutor {
                     }
 
                     return false;
+                case "delparentrank":
+                    if (args.length != 2) {
+                        Core.message(Main.prefix + "&cInvalid usage /Ranks delparentrank <rank>", sender);
+                        return false;
+                    }
+
+                    Rank drank = Main.rankManager.findRank(args[1]);
+
+                    if (drank == null) {
+                        Core.message(Main.prefix + args[1] + " &crank not found", sender);
+                        return false;
+                    }
+
+                    drank.setParentRank("");
+
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        if (Main.rankManager.getRank(player.getUniqueId()).getName().equalsIgnoreCase(args[1])) {
+                            Main.permissionsManager.updatePlayerPermissions(player);
+                        }
+                    }
+
+                    return false;
                 case "addpermission":
                     if (args.length != 3) {
                         Core.message(Main.prefix + "&cInvalid usage /Ranks addpermission <rank> <permissions>", sender);
@@ -183,10 +206,22 @@ public class RanksCommand implements CommandExecutor {
                         return false;
                     }
 
+                    if (rank1.getPermissions().isEmpty() && !rank1.hasParentRank()) {
+                        Core.message(Main.prefix + args[1] + " &cdoes not have any permissions", sender);
+                        return false;
+                    }
+
                     Core.message(Main.prefix + "these are " + args[1] + "'s permissions", sender);
 
                     for (String perm : rank1.getPermissions()) {
                         Core.message(Main.prefix + perm, sender);
+                    }
+
+                    if (rank1.hasParentRank()) {
+                        Rank parent = Main.rankManager.findRank(rank1.getParentRank());
+                        for (String perm : parent.getPermissions()) {
+                            Core.message(Main.prefix + "[inherited from " + rank1.getParentRank() + "] " + perm, sender);
+                        }
                     }
 
                     return false;
@@ -208,6 +243,7 @@ public class RanksCommand implements CommandExecutor {
         Core.message(Main.prefix + "/ranks setprefix - set a rank prefix", sender);
         Core.message(Main.prefix + "/ranks setdefaultrank - set the default rank", sender);
         Core.message(Main.prefix + "/ranks setparentrank - set a ranks parent", sender);
+        Core.message(Main.prefix + "/ranks delparentrank - remove a ranks parent", sender);
         Core.message(Main.prefix + "/ranks addpermission - add a rank permission", sender);
         Core.message(Main.prefix + "/ranks removepermission - remove a rank permission", sender);
         Core.message(Main.prefix + "/ranks getpermissions - get a ranks permissions", sender);

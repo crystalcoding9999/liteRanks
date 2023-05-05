@@ -34,8 +34,8 @@ public final class Main extends JavaPlugin {
         new ChatListener(this);
 
         getCommand("ranks").setExecutor(new RanksCommand());
-        getCommand("ping").setExecutor(new PingCommand());
-        getCommand("test").setExecutor(new TestCommand());
+        //getCommand("ping").setExecutor(new PingCommand());
+        //getCommand("test").setExecutor(new TestCommand());
     }
 
     @Override
