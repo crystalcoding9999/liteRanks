@@ -110,6 +110,10 @@ public class RankManager {
         }
     }
 
+    public void playerJoin(Player p) {
+        updateName(p);
+    }
+
     private void defaultRanks() {
         if(!rankExists("member")) addRank(createRank("member", "&7Member", new ArrayList<>()));
         if(!rankExists("vip")) addRank(createRank("vip","&aVip", new ArrayList<>()));
@@ -153,8 +157,8 @@ public class RankManager {
     public void setRank(UUID uuid, Rank r) {
         Player p = Core.uuidToPlayer(uuid);
         playerRanks.put(uuid,r.getName());
-        Main.permissionsManager.updatePlayerPermissions(p);
         Core.message(Main.prefix + "your rank has been set to " + r.getName(), p);
+        Main.permissionsManager.updatePlayerPermissions(p);
         updateName(p);
     }
 
@@ -204,8 +208,8 @@ public class RankManager {
 
     public void updateName(Player p) {
         Rank r = getRank(p.getUniqueId());
-        String dName = r.getPrefix() + " " + p.getName();
-        Main.playerDNames.put(p.getUniqueId(), dName);
+        String dName = Core.color(r.getPrefix() + " " + p.getName() + "&f");
+        p.setDisplayName(dName);
         p.setPlayerListName(Core.color(dName));
     }
 }
