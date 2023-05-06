@@ -5,6 +5,8 @@ import com.crystalcraft.listeners.ChatListener;
 import com.crystalcraft.listeners.JoinListener;
 import com.crystalcraft.managers.PermissionsManager;
 import com.crystalcraft.managers.RankManager;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -17,8 +19,6 @@ public final class Main extends JavaPlugin {
 
     public static RankManager rankManager;
     public static PermissionsManager permissionsManager;
-
-    public static HashMap<UUID, String> playerDNames = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -36,6 +36,10 @@ public final class Main extends JavaPlugin {
         getCommand("ranks").setExecutor(new RanksCommand());
         //getCommand("ping").setExecutor(new PingCommand()); // debug command used during development
         //getCommand("test").setExecutor(new TestCommand()); // debug command used during development
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            rankManager.playerJoin(p);
+        }
     }
 
     @Override

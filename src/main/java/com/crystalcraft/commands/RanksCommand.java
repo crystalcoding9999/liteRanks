@@ -118,6 +118,10 @@ public class RanksCommand implements CommandExecutor {
         }
         Player p = Bukkit.getPlayer(args[1]);
         Rank r = Main.rankManager.findRank(args[2]);
+        if (p == null) {
+            Core.message(Main.prefix + "&cPlayer not found", sender);
+            return;
+        }
         if (r != null) {
             Main.rankManager.setRank(p.getUniqueId(), r);
             Core.message(Main.prefix + "Succesfully set " + p.getName() + "'s rank to " + r.getName(), sender);
