@@ -1,10 +1,12 @@
 name: liteRanks
-version: '1.0'
+version: '1.1'
 main: com.crystalcraft.literanks.Main
 api-version: 1.19
 
 permissions:
   ranks:
+    default: op
+  staff:
     default: op
   #test: # debug permission used during development
   #  default: false

@@ -14,7 +14,7 @@ public class PermissionsManager {
 
     HashMap<UUID, PermissionAttachment> attachments = new HashMap<>();
 
-    public void updatePlayerPermissions(Player p) {
+    public void updatePlayerPermissions(Player p, boolean tell) {
         PermissionAttachment attachment = attachments.get(p.getUniqueId());
 
         if (attachment == null) {
@@ -38,12 +38,12 @@ public class PermissionsManager {
             }
         }
 
-        Core.message(Main.prefix + "&ayour permissions have been updated", p);
+        if (tell) Core.message(Main.prefix + "&ayour permissions have been updated", p);
     }
 
     public void updatePlayerPermissions() {
         for (Player p : Bukkit.getOnlinePlayers()) {
-            updatePlayerPermissions(p);
+            updatePlayerPermissions(p, (p.isOp() || p.hasPermission("staff")));
         }
     }
 }

@@ -181,7 +181,7 @@ public class RanksCommand implements CommandExecutor {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (Main.rankManager.getRank(player.getUniqueId()).getName().equalsIgnoreCase(childRank.getName()))
-                Main.permissionsManager.updatePlayerPermissions(player);
+                Main.permissionsManager.updatePlayerPermissions(player, (player.isOp() || player.hasPermission("staff")));
         }
     }
 
@@ -202,7 +202,7 @@ public class RanksCommand implements CommandExecutor {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (Main.rankManager.getRank(player.getUniqueId()).getName().equalsIgnoreCase(args[1])) {
-                Main.permissionsManager.updatePlayerPermissions(player);
+                Main.permissionsManager.updatePlayerPermissions(player, (player.isOp() || player.hasPermission("staff")));
             }
         }
     }
@@ -230,7 +230,7 @@ public class RanksCommand implements CommandExecutor {
         Core.message(Main.prefix + "&asuccessfully added &f" + apermission + " &ato &f" + args[1], sender);
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (Main.rankManager.getRank(player.getUniqueId()).getName().equalsIgnoreCase(ar.getName()))
-                Main.permissionsManager.updatePlayerPermissions(player);
+                Main.permissionsManager.updatePlayerPermissions(player, (player.isOp() || player.hasPermission("staff")));
         }
     }
 
@@ -257,7 +257,7 @@ public class RanksCommand implements CommandExecutor {
         Core.message(Main.prefix + "&asuccessfully removed &f" + permission + " &afrom &f" + args[1], sender);
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (Main.rankManager.getRank(player.getUniqueId()).getName().equalsIgnoreCase(rank.getName()))
-                Main.permissionsManager.updatePlayerPermissions(player);
+                Main.permissionsManager.updatePlayerPermissions(player, (player.isOp() || player.hasPermission("staff")));
         }
     }
 

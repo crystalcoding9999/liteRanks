@@ -115,11 +115,14 @@ public class RankManager {
     }
 
     private void defaultRanks() {
-        if(!rankExists("member")) addRank(createRank("member", "&7Member", new ArrayList<>()));
-        if(!rankExists("vip")) addRank(createRank("vip","&aVip", new ArrayList<>()));
-        if(!rankExists("moderator")) addRank(createRank("moderator","&2Moderator", new ArrayList<>()));
-        if(!rankExists("admin")) addRank(createRank("admin","&9Admin", new ArrayList<>()));
-        if(!rankExists("owner")) addRank(createRank("owner","&cOwner", new ArrayList<>()));
+        ArrayList<String> dp = new ArrayList<>();
+        ArrayList<String> sp = new ArrayList<>();
+        sp.add("staff");
+        if(!rankExists("member")) addRank(createRank("member", "&7Member", dp));
+        if(!rankExists("vip")) addRank(createRank("vip","&aVip", dp));
+        if(!rankExists("moderator")) addRank(createRank("moderator","&2Moderator", sp));
+        if(!rankExists("admin")) addRank(createRank("admin","&9Admin", sp));
+        if(!rankExists("owner")) addRank(createRank("owner","&cOwner", sp));
 
         Core.console(" • created the default ranks");
     }
@@ -158,7 +161,7 @@ public class RankManager {
         Player p = Core.uuidToPlayer(uuid);
         playerRanks.put(uuid,r.getName());
         Core.message(Main.prefix + "your rank has been set to " + r.getName(), p);
-        Main.permissionsManager.updatePlayerPermissions(p);
+        Main.permissionsManager.updatePlayerPermissions(p, (p.isOp() || p.hasPermission("staff")));
         updateName(p);
     }
 
