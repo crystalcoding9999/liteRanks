@@ -1,13 +1,14 @@
 package com.crystalcraft.managers;
 
 import com.crystalcraft.classes.Rank;
-import com.crystalcraft.literanks.Core;
+import com.crystalcraft.util.Core;
 import com.crystalcraft.literanks.Main;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -112,6 +113,7 @@ public class RankManager {
 
     public void playerJoin(Player p) {
         updateName(p);
+        Main.permissionsManager.updatePlayerPermissions(p,false);
     }
 
     private void defaultRanks() {
@@ -198,15 +200,23 @@ public class RankManager {
         }
     }
 
+    public void changeName(Rank r, String name) {
+        String oldName = r.getName();
+        ranks.remove(r);
+        r.setName(ChatColor.stripColor(name));
+        ranks.add(r);
+        for (UUID u : playerRanks.keySet()) {
+            if (playerRanks.get(u).equalsIgnoreCase(oldName)) {
+                playerRanks.put(u,name);
+            }
+        }
+    }
+
     public void changePrefix(Rank r, String prefix) {
         ranks.remove(r);
         r.setPrefix(prefix);
         ranks.add(r);
-        for (UUID u : playerRanks.keySet()) {
-            if (playerRanks.get(u).equalsIgnoreCase(r.getName())) {
-                updateName(Core.uuidToPlayer(u));
-            }
-        }
+        updateNames();
     }
 
     public void updateName(Player p) {
@@ -214,5 +224,28 @@ public class RankManager {
         String dName = Core.color(r.getPrefix() + " " + p.getName() + "&f");
         p.setDisplayName(dName);
         p.setPlayerListName(Core.color(dName));
+    }
+
+    public void updateNames() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            Rank r = getRank(p.getUniqueId());
+            String dName = Core.color(r.getPrefix() + " " + p.getName() + "&f");
+            p.setDisplayName(dName);
+            p.setPlayerListName(Core.color(dName));
+        }
+    }
+
+    public void addPermission(String perm, Rank r) {
+        ranks.remove(r);
+        r.getPermissions().add(perm);
+        ranks.add(r);
+        Main.permissionsManager.updateRankPermissions(r);
+    }
+
+    public void removePermission(String perm, Rank r) {
+        ranks.remove(r);
+        r.getPermissions().remove(perm);
+        ranks.add(r);
+        Main.permissionsManager.updateRankPermissions(r);
     }
 }

@@ -1,6 +1,6 @@
 package com.crystalcraft.commands;
 
-import com.crystalcraft.literanks.Core;
+import com.crystalcraft.util.Core;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

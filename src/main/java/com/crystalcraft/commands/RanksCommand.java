@@ -1,13 +1,17 @@
 package com.crystalcraft.commands;
 
 import com.crystalcraft.classes.Rank;
-import com.crystalcraft.literanks.Core;
+import com.crystalcraft.gui.MainGUI;
+import com.crystalcraft.gui.MainGUIEnum;
+import com.crystalcraft.util.Core;
 import com.crystalcraft.literanks.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 
@@ -36,6 +40,9 @@ public class RanksCommand implements CommandExecutor {
                 case "setrank":
                     setrank(sender, args);
                     return false;
+                case "setname":
+                    setName(sender,args);
+                    return false;
                 case "setprefix":
                     setprefix(sender, args);
                     return false;
@@ -57,6 +64,13 @@ public class RanksCommand implements CommandExecutor {
                 case "getpermissions":
                     getpermissions(sender, args);
                     return false;
+                case "gui":
+                    if (sender instanceof Player) {
+                        MainGUI.main((Player) sender);
+                    } else {
+                        Core.message(Main.prefix + "&cOnly players can do this", sender);
+                    }
+                    return false;
                 default:
                     subcommands(sender);
                     return false;
@@ -72,6 +86,7 @@ public class RanksCommand implements CommandExecutor {
         Core.message(Main.prefix + "/ranks delete - delete a rank", sender);
         Core.message(Main.prefix + "/ranks getranks - lists all the ranks", sender);
         Core.message(Main.prefix + "/ranks setrank - set a player rank", sender);
+        Core.message(Main.prefix + "/ranks setname - set a rank name", sender);
         Core.message(Main.prefix + "/ranks setprefix - set a rank prefix", sender);
         Core.message(Main.prefix + "/ranks setdefaultrank - set the default rank", sender);
         Core.message(Main.prefix + "/ranks setparentrank - set a ranks parent", sender);
@@ -79,20 +94,39 @@ public class RanksCommand implements CommandExecutor {
         Core.message(Main.prefix + "/ranks addpermission - add a rank permission", sender);
         Core.message(Main.prefix + "/ranks removepermission - remove a rank permission", sender);
         Core.message(Main.prefix + "/ranks getpermissions - get a ranks permissions", sender);
+        Core.message(Main.prefix + "/ranks gui - open the gui", sender);
         //Core.message(Main.prefix + "/ranks ", sender);
     }
 
     void create(CommandSender sender, String[] args) {
-        if (!Main.rankManager.rankExists(args[1])) {
-            Main.rankManager.addRank(Main.rankManager.createRank(args[1], args[1], new ArrayList<>()));
-            Core.message(Main.prefix + "succesfully created the " + args[1] + " rank", sender);
+        if (args.length != 2) {
+            Core.message(Main.prefix + "Invalid usage /ranks create <name>", sender);
+            return;
+        }
+
+        if (Main.rankManager.ranks.size() < 28) {
+            if (!Main.rankManager.rankExists(args[1])) {
+                Main.rankManager.addRank(Main.rankManager.createRank(args[1], args[1], new ArrayList<>()));
+                Core.message(Main.prefix + "succesfully created the " + args[1] + " rank", sender);
+            } else {
+                Core.message(Main.prefix + "&cthe rank &f" + args[1] + "&c already exists", sender);
+            }
         } else {
-            Core.message(Main.prefix + "&cthe rank &f" + args[1] + "&c already exists", sender);
+            Core.message(Main.prefix + "&cYou have reached the max amount of ranks!", sender);
+            Core.message(Main.prefix + "&cThis cannot be overriden due to a high likelyhood of plugin failure!", sender);
         }
     }
 
     void delete(CommandSender sender, String[] args) {
+        if (args.length != 2) {
+            Core.message(Main.prefix + "Invalid usage /ranks delete <name>", sender);
+            return;
+        }
         Rank dr = Main.rankManager.findRank(args[1]);
+        if (dr == null) {
+            Core.message(Main.prefix + "&cthe rank &f" + args[1] + " &cdoes not exist", sender);
+            return;
+        }
         if (dr.getName() == Main.rankManager.defaultRank.getName()) {
             Core.message(Main.prefix + "&cthe default rank cannot be deleted", sender);
             return;
@@ -130,8 +164,28 @@ public class RanksCommand implements CommandExecutor {
         }
     }
 
+    void setName(CommandSender sender, String[] args) {
+        if (args.length != 3) {
+            Core.message(Main.prefix + "&cInvalid Usage /ranks setname <rank> <name>", sender);
+            return;
+        }
+        Rank spr = Main.rankManager.findRank(args[1]);
+        if (spr == null) {
+            Core.message(Main.prefix + "&cThe &f" + args[1] + "&c rank doesn't exist", sender);
+            return;
+        }
+        if (args[2].contains("&")) {
+            Core.message(Main.prefix + "&cColor codes are not supported in rank names!", sender);
+            return;
+        }
+        String name = args[2];
+        String oldName = spr.getName();
+        Main.rankManager.changeName(spr, name);
+        Core.message(Main.prefix + "successfully changed the " + oldName + "&r rank's name to " + name, sender);
+    }
+
     void setprefix(CommandSender sender, String[] args) {
-        if (args.length < 3) {
+        if (args.length != 3) {
             Core.message(Main.prefix + "&cInvalid Usage /ranks setprefix <rank> <prefix>", sender);
             return;
         }
@@ -146,6 +200,10 @@ public class RanksCommand implements CommandExecutor {
     }
 
     void setdefaultrank(CommandSender sender, String[] args) {
+        if (args.length != 2) {
+            Core.message(Main.prefix + "Invalid usage /ranks setdefaultrank <name>", sender);
+            return;
+        }
         String newRankName = args[1];
         Rank newRank = Main.rankManager.findRank(newRankName);
         if (newRank != null) {
@@ -226,12 +284,9 @@ public class RanksCommand implements CommandExecutor {
             return;
         }
 
-        ar.getPermissions().add(apermission);
+        Main.rankManager.addPermission(apermission,ar);
         Core.message(Main.prefix + "&asuccessfully added &f" + apermission + " &ato &f" + args[1], sender);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (Main.rankManager.getRank(player.getUniqueId()).getName().equalsIgnoreCase(ar.getName()))
-                Main.permissionsManager.updatePlayerPermissions(player, (player.isOp() || player.hasPermission("staff")));
-        }
+        if (Bukkit.getPluginManager().getPermission(apermission) == null) Core.message(Main.prefix + "&cthe permission wasn't found so theres a chance that it does not work!", sender);
     }
 
     void removepermission(CommandSender sender, String[] args) {
@@ -253,12 +308,8 @@ public class RanksCommand implements CommandExecutor {
             return;
         }
 
-        rank.getPermissions().remove(permission);
+        Main.rankManager.removePermission(permission,rank);
         Core.message(Main.prefix + "&asuccessfully removed &f" + permission + " &afrom &f" + args[1], sender);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (Main.rankManager.getRank(player.getUniqueId()).getName().equalsIgnoreCase(rank.getName()))
-                Main.permissionsManager.updatePlayerPermissions(player, (player.isOp() || player.hasPermission("staff")));
-        }
     }
 
     void getpermissions(CommandSender sender, String[] args) {
